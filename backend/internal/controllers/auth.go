@@ -90,7 +90,7 @@ func (controller *Controller) SignInViaYandexId(w http.ResponseWriter, r *http.R
 	yaOAuthToken := r.Header.Get("OAuth")
 
 	response := service.AuthorizedUser(yaOAuthToken)
-
+	//
 	json.NewEncoder(w).Encode(response)
 }
 
