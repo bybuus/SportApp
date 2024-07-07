@@ -2,9 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/kendoow/SportApp/backend/internal/model"
-	"github.com/kendoow/SportApp/backend/internal/utils"
 	"net/http"
 )
 
@@ -58,33 +55,43 @@ import (
 //	}
 //}
 
-func (controller *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+//func (controller *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
+//	if r.Method != http.MethodPost {
+//		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+//		return
+//	}
+//
+//	service := controller.service
+//	var requestBody model.RegisterBody
+//	fmt.Print(requestBody)
+//	err := json.NewDecoder(r.Body).Decode(&requestBody)
+//
+//	if err != nil {
+//		utils.Error.Println("Invalid request body")
+//		http.Error(w, "Invalid request body", http.StatusBadRequest)
+//		return
+//	}
+//
+//	createdUserId, err := service.SignUp(&requestBody)
+//
+//	if err != nil {
+//		utils.Error.Println("User cannot be created")
+//		http.Error(w, err.Error(), http.StatusUnauthorized)
+//		return
+//	}
+//
+//	w.Header().Set("Content-Type", "application/json")
+//	json.NewEncoder(w).Encode(createdUserId)
+//}
 
+func (controller *Controller) SignInViaYandexId(w http.ResponseWriter, r *http.Request) {
 	service := controller.service
-	var requestBody model.RegisterBody
-	fmt.Print(requestBody)
-	err := json.NewDecoder(r.Body).Decode(&requestBody)
 
-	if err != nil {
-		utils.Error.Println("Invalid request body")
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
+	yaOAuthToken := r.Header.Get("OAuth")
 
-	createdUserId, err := service.SignUp(&requestBody)
+	response := service.AuthorizedUser(yaOAuthToken)
 
-	if err != nil {
-		utils.Error.Println("User cannot be created")
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(createdUserId)
+	json.NewEncoder(w).Encode(response)
 }
 
 //func Logout(w http.ResponseWriter, r *http.Request) {

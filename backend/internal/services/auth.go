@@ -2,33 +2,63 @@ package services
 
 import (
 	"context"
-	"github.com/kendoow/SportApp/backend/internal/model"
-	"log"
+	"github.com/kendoow/SportApp/backend/internal/client"
+	"github.com/kendoow/SportApp/backend/internal/controllers/dto/auth"
 )
 
-func (service *Service) SignUp(req *model.RegisterBody) (any, error) {
-	repo := service.repo
-	user, err := repo.FindUserByPhone(context.Background(), req.Phone)
+//func (service *Service) SignUp(req *model.RegisterBody) (any, error) {
+//	repo := service.repo
+//	user, err := repo.FindUserByPhone(context.Background(), req.Phone)
+//
+//	if err != nil {
+//		log.Println("failed when getting user from db")
+//		return "", err
+//	}
+//
+//	if user != nil {
+//		log.Println("Phone number already in use")
+//		return "", err
+//	}
+//
+//	// create new user, everything cool
+//	insertedId, err := repo.insertUser(context.Background(), req)
+//
+//	if err != nil {
+//		log.Println("Error when inserting user in db")
+//		return "", err
+//	}
+//
+//	return insertedId, nil
+//}
+
+func (service *Service) AuthorizedUser(token string) *auth.AuthResponse {
+	yaClient := client.YaIdClient{}
+
+	yaUserInfo := yaClient.Authorized(token)
+
+	repository := service.repo
+
+	err := repository.UpsertUserByPhone(
+		yaUserInfo.Phone,
+		yaUserInfo.Login,
+		token,
+		yaUserInfo.ClientId)
 
 	if err != nil {
-		log.Println("failed when getting user from db")
-		return "", err
+
 	}
 
-	if user != nil {
-		log.Println("Phone number already in use")
-		return "", err
-	}
-
-	// create new user, everything cool
-	insertedId, err := repo.InsertUser(context.Background(), req)
-
+	userEntity, err := repository.FindUserByPhone(context.TODO(), yaUserInfo.Phone)
 	if err != nil {
-		log.Println("Error when inserting user in db")
-		return "", err
+
 	}
 
-	return insertedId, nil
+	authResponse := auth.AuthResponse{
+		Id:    userEntity.Id.Hex(),
+		Login: userEntity.Login,
+	}
+
+	return &authResponse
 }
 
 //func (service *Service) Login(req *model.RegisterBody) (*model.UserAuthorized, string, error) {
